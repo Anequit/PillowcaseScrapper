@@ -1,0 +1,146 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PillowcaseScrapper.ViewModels"
+        xmlns:v="using:PillowcaseScrapper.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="700"
+        x:Class="PillowcaseScrapper.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
+        xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
+        xmlns:sty="using:FluentAvalonia.Styling"
+        xmlns:models="using:PillowcaseScrapper.Models"
+        xmlns:input="using:FluentAvalonia.UI.Input"
+        Width="400"
+				MinWidth="400"
+				MaxWidth="400"
+				CanResize="False"
+        Height="700"
+        Icon="/Assets/favicon.ico"
+        Title="Pillowcase Scrapper">
+
+  <Design.DataContext>
+      <!-- This only sets the DataContext for the previewer in an IDE,
+            to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+      <vm:MainWindowViewModel/>
+  </Design.DataContext>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="48"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Grid Grid.Row="0" Margin="17 0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+
+			<!--FilterMode="Contains"
+			ItemsSource="{Binding Songs}"
+			ValueMemberBinding="{Binding FileName, DataType=models:Song}"-->
+			<TextBox Grid.Column="0"
+							 Watermark="Search" 
+							 Height="32" 
+							 Text="{Binding SearchText}"			 
+							 Classes="clearButton"
+							 IsEnabled="{Binding !IsBusy}"/>
+      <Button Grid.Column="1" 
+              Classes="accent"
+              Width="32" 
+              Height="32"
+							Command="{Binding LoadSongsCommand}"
+              Margin="5 0 0 0"
+              Padding="0"
+							IsEnabled="{Binding !IsBusy}">
+        <ui:SymbolIcon Symbol="Refresh" 
+											 FontSize="16"/>
+      </Button>
+    </Grid>
+
+    <Grid Grid.Row="1" 
+					Background="{DynamicResource ResourceKey=SolidBackgroundFillColorTertiary}">
+      <ui:ProgressRing Height="45" 
+											 BorderThickness="5" 
+											 IsIndeterminate="True" 
+											 IsVisible="{Binding IsBusy}"/>
+      <ScrollViewer Padding="20 20 20 0" AllowAutoHide="True" IsScrollChainingEnabled="True" >
+        <ItemsControl ItemsSource="{Binding Songs}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VirtualizingStackPanel Orientation="Vertical" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="models:Song">
+              <ui:SettingsExpander Description="{Binding Size}"
+                                   Margin="0 0 0 6">
+								<ui:SettingsExpander.Resources>
+									<Thickness x:Key="SettingsExpanderItemBottomFooterMargin">0 16 0 0</Thickness>
+								</ui:SettingsExpander.Resources>
+								
+                <!-- Header -->
+                <ui:SettingsExpander.Header>
+                  <Grid>
+                    <TextBlock Padding="0 8 0 0" 
+                               Text="{Binding FileName}"
+															 Width="282"
+															 HorizontalAlignment="Left"
+															 TextWrapping="NoWrap"
+															 TextTrimming="CharacterEllipsis"
+															 TextAlignment="Left"/>
+                    <DropDownButton Content="&#xE712;"
+                                    FontSize="20"
+                                    Padding="8"
+                                    FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                    Theme="{StaticResource TransparentButton}"
+                                    HorizontalAlignment="Right">
+                      <DropDownButton.Flyout>
+                        <ui:FAMenuFlyout Placement="Bottom">
+                          <ui:MenuFlyoutItem Text="Copy Link"
+																						 Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CopyLinkCommand}"
+																						 CommandParameter="{Binding}"/>
+                          <ui:MenuFlyoutItem Text="Open Link"
+																						 Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).OpenLinkCommand}"
+																						 CommandParameter="{Binding}"/>
+                        </ui:FAMenuFlyout>
+                      </DropDownButton.Flyout>
+                    </DropDownButton>
+                  </Grid>
+                </ui:SettingsExpander.Header>
+
+                <!-- Footer -->
+                <ui:SettingsExpander.Footer>
+                  <Grid HorizontalAlignment="Center"
+                        Width="350"
+												Height="32">
+                    <!-- Will change to Open once downloaded -->
+                    <Button Margin="8 0"
+                            IsVisible="{Binding !Downloaded, Mode=TwoWay}"
+                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).DownloadCommand}"
+                            CommandParameter="{Binding}"
+                            HorizontalAlignment="Stretch"
+														IsEnabled="{Binding !Downloading}">
+                      <ui:SymbolIcon Symbol="Download" 
+                                     FontSize="18" />
+                    </Button>
+
+                    <Button Margin="8 0"
+                            IsVisible="{Binding Downloaded, Mode=TwoWay}"
+														HorizontalAlignment="Stretch"
+														Classes="accent"
+														Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).OpenFileCommand}"
+                            CommandParameter="{Binding}"
+                            Content="Open" />
+                  </Grid>
+
+                </ui:SettingsExpander.Footer>
+              </ui:SettingsExpander>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Grid>
+  </Grid>
+</Window>
